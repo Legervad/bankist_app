@@ -16,4 +16,7 @@ All transactions are also stored in the DB, and when the user logs in, they are 
 More detailed explanations will be provided later.
 Registration service will be added in the following days.
 
-
+![My Image](landing.jpg)
+![My Image](home.jpg)
+![My Image](users.jpg)
+![My Image](transactions.jpg)
