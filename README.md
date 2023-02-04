@@ -14,7 +14,9 @@ Users can login to the system using their usernames and passwords, can loan mone
 All transactions are also stored in the DB, and when the user logs in, they are displayed on the screen.
 
 More detailed explanations will be provided later.
-Registration service will be added in the following days.
+
+#Registration service will be added in the following days.
+#Passwords are also stored in the DB as plain text, they will be hashed in the following days.
 
 ![My Image](landing.jpg)
 ![My Image](home.jpg)
