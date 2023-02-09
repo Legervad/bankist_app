@@ -3,36 +3,6 @@ import * as utility from './utility.js';
 import * as classes from './classes.js';
 import * as opt from './fetchOptions.js';
 
-// Data
-const account1 = {
-    owner: 'Jonas Schmedtmann',
-    movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
-    interestRate: 1.2, // %
-    pin: 1111,
-};
-const account2 = {
-    owner: 'Jessica Davis',
-    movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
-    interestRate: 1.5,
-    pin: 2222,
-};
-
-const account3 = {
-    owner: 'Steven Thomas Williams',
-    movements: [200, -200, 340, -300, -20, 50, 400, -460],
-    interestRate: 0.7,
-    pin: 3333,
-};
-
-const account4 = {
-    owner: 'Sarah Smith',
-    movements: [430, 1000, 700, 50, 90],
-    interestRate: 1,
-    pin: 4444,
-};
-
-let accounts = [account1, account2, account3, account4];
-
 // Elements
 const labelWelcome = document.querySelector('.welcome');
 const labelDate = document.querySelector('.date');
@@ -60,6 +30,18 @@ const inputTransferAmount = document.querySelector('.form__input--amount');
 const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
+
+// Registration modal
+const overlay = document.querySelector(`.overlay`);
+const closeModalButton = document.querySelector(`.close-modal`);
+const modal = document.querySelector(`.modal`);
+
+const registrationForm = document.getElementById('registration-form');
+const userName = document.getElementById('user-name');
+const userSurname = document.getElementById('user-surname');
+const userUsername = document.getElementById('user-username');
+const userPassword = document.getElementById('user-password');
+const userMail = document.getElementById('user-email');
 
 let currentUser;
 let currentTransactions;
@@ -177,6 +159,8 @@ btnTransact.addEventListener(`click`, function (e) {
 
             // Don't forget to update the currentUser's balance as well.
             currentUser.userBalance -= currTransaction.transactionAmount;
+            inputTransferTo.value = '';
+            inputTransferAmount.value = '';
         });
 });
 
@@ -234,8 +218,7 @@ btnLoan.addEventListener(`click`, function (e) {
 
 btnRegister.addEventListener(`click`, function (e) {
     e.preventDefault();
-
-    //REGISTER THE USER
+    utility.openModal(modal, overlay);
 });
 
 let sorted = false;
@@ -253,4 +236,64 @@ btnSort.addEventListener(`click`, function (e) {
         utility.displayMovements(currentTransactions, containerMovements);
         sorted = false;
     }
+});
+
+registrationForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (userName.value == '' || userSurname.value == '' || userUsername.value == '' || userPassword.value == '' || userMail.value == '') {
+        alert('Make sure you fill all the fields!');
+    } else {
+        // O/w create the user object, and fill its corresponding fields
+        let currUser = new classes.User();
+
+        console.log(`userPassword ${userPassword.value}`);
+
+        currUser.userUsername = userUsername.value;
+        currUser.userPassword = Number(userPassword.value);
+        currUser.userFullname = `${userName.value} ${userSurname.value}`;
+        currUser.userEmail = userMail.value;
+
+        console.log(currUser);
+
+        // Status Code
+        let statusCode;
+        // Send the request
+        fetch('http://localhost:8080/register', opt.registrationOptions(currUser))
+            .then(response => {
+                statusCode = response.status;
+                return response.text();
+            })
+            .then(data => {
+                // If the user could not be created
+                console.log(statusCode);
+                if (statusCode != 201) {
+                    // Alert the response body so that the user know what is wrong
+                    alert(data);
+                    throw new Error(data);
+                } else {
+                    // Then we successfully created the user
+                    alert('Successfully created the user!');
+                    utility.closeModal(modal, overlay);
+                }
+                utility.clearRegistrationForm(userName, userSurname, userUsername, userPassword, userMail);
+            })
+            .catch(error => console.log(error));
+    }
+});
+
+// The below event listeners are to close the registration modal in different ways = ESC, CLICK-ON-OVERLAY, CLOSE-BUTTON
+closeModalButton.addEventListener('click', e => {
+    e.preventDefault();
+
+    utility.closeModal(modal, overlay);
+});
+
+document.addEventListener(`keydown`, function (e) {
+    if (!modal.classList.contains(`hidden`) && e.key === `Escape`) {
+        utility.closeModal(modal, overlay);
+    }
+});
+
+overlay.addEventListener('click', e => {
+    utility.closeModal(modal, overlay);
 });

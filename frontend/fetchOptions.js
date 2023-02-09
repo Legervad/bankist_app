@@ -47,4 +47,16 @@ const transactionOptions = currTransaction => {
     };
 };
 
-export { loginOptions, homeOptions, loanOptions, transactionOptions };
+const registrationOptions = currUser => {
+    return {
+        method: 'POST',
+        url: 'http://localhost:8080/register',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(currUser),
+    };
+};
+
+export { loginOptions, homeOptions, loanOptions, transactionOptions, registrationOptions };

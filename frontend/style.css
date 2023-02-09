@@ -317,3 +317,85 @@ h2 {
 .timer {
     font-weight: 600;
 }
+
+.show-modal {
+    font-size: 2rem;
+    font-weight: 600;
+    padding: 1.75rem 3.5rem;
+    margin: 5rem 2rem;
+    border: none;
+    background-color: #fff;
+    color: #444;
+    border-radius: 10rem;
+    cursor: pointer;
+}
+
+.close-modal {
+    position: absolute;
+    top: 1.2rem;
+    right: 2rem;
+    font-size: 5rem;
+    color: #333;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+.hidden {
+    display: none;
+}
+
+.modal {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 27.5%;
+
+    background-color: white;
+    padding: 6rem;
+    border-radius: 5px;
+    box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    z-index: 5;
+}
+
+.registration-inputs {
+    border: none;
+    padding: 0.5rem 2rem;
+    font-size: 1.6rem;
+    font-family: inherit;
+    text-align: center;
+    width: 40rem;
+    border-radius: 10rem;
+    margin-right: 1rem;
+    color: inherit;
+    border: 1px solid #5a5a5a;
+    transition: all 0.3s;
+}
+
+#registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+#submit-button {
+    width: 100px;
+    height: 30px;
+    margin-left: 73%;
+}
+#registration-header {
+    margin-left: 36.5%;
+    margin-bottom: 10%;
+}

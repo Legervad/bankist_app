@@ -50,8 +50,8 @@ func main()  {
 	router.HandleFunc("/home", HomeHandler).Methods("POST");
 	router.HandleFunc("/register", RegisterHandler).Methods("POST");
 	router.HandleFunc("/transaction", TransactionHandler).Methods("POST");
-	router.HandleFunc("/loan", LoanHandler).Methods("POST")
-	
+	router.HandleFunc("/loan", LoanHandler).Methods("POST");
+
 	handler := corsWrapper.Handler(router);
 	
 	log.Fatal(http.ListenAndServe(":8080", handler))

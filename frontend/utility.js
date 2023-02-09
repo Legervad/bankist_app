@@ -18,7 +18,9 @@ function calcDisplaySummary(movements, labelSumIn, labelSumOut) {
     console.log(`Movs len ${movements.length}`);
     console.log(`Movs nonneg len ${movements.filter(curr => curr >= 0).length}`);
     console.log(`Movs neg len ${movements.filter(curr => curr < 0).length}`);
-
+    console.log();
+    console.log();
+    console.log();
     labelSumIn.textContent =
         movements.length == 0
             ? `${0} €`
@@ -36,11 +38,12 @@ function calcDisplaySummary(movements, labelSumIn, labelSumOut) {
             ? `${0} €`
             : Math.abs(
                   movements.reduce((acc, currNum) => {
+                      console.log(`currNum in labelsumOUT ${currNum}`);
                       if (currNum < 0) {
                           acc += currNum;
                       }
                       return acc;
-                  })
+                  }, 0)
               ) + `€`;
 }
 // Get the balance from the labelBalance, add the amount to it, and update the labelBalance
@@ -56,4 +59,22 @@ function sleep(milliseconds) {
     } while (currentDate - date < milliseconds);
 }
 
-export { displayMovements, calcDisplaySummary, balanceAdd, sleep };
+// To close the registration modal
+const closeModal = function (modal, overlay) {
+    modal.classList.add(`hidden`);
+    overlay.classList.add(`hidden`);
+};
+// To open the registration modal
+const openModal = function (modal, overlay) {
+    modal.classList.remove(`hidden`);
+    overlay.classList.remove(`hidden`);
+};
+
+function clearRegistrationForm(userName, userSurname, userUsername, userPassword, userMail) {
+    userName.value = '';
+    userSurname.value = '';
+    userUsername.value = '';
+    userPassword.value = '';
+    userMail.value = '';
+}
+export { displayMovements, calcDisplaySummary, balanceAdd, sleep, closeModal, openModal, clearRegistrationForm };

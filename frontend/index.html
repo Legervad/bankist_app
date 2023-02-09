@@ -97,9 +97,22 @@
             <p class="logout-timer">You will be logged out in <span class="timer">05:00</span></p>
         </main>
 
-        <!-- <footer>
-      &copy; by Jonas Schmedtmann. Don't claim as your own :)
-    </footer> -->
+        <!-- Registration -->
+        <div class="modal hidden">
+            <button class="close-modal">&times;</button>
+            <h1 id="registration-header">Register</h1>
+            <form id="registration-form"">
+      
+              <input type="text" id="user-name" class="registration-inputs" placeholder="Name" />
+              <input type="text" id="user-surname" class="registration-inputs" placeholder="Surname"/>
+              <input type="text" id="user-username" class="registration-inputs" placeholder="Username"/>
+              <input type="password" id="user-password" class="registration-inputs" placeholder="Password"/>
+              <input type="email" id="user-email" class="registration-inputs" placeholder="Email"/>
+      
+              <button type="submit" id="submit-button">Submit!</button>
+            </form>
+          </div>
+          <div class="overlay hidden"></div>
         <script type="module" src="script.js"></script>
     </body>
 </html>

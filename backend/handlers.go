@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -218,12 +219,21 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	json.NewDecoder(r.Body).Decode(&user);
-	
+	// Also initialize the balance to be 0
+	user.UserBalance = 0;
+
+
 	// Check if necessary information is complete
 	// If not return 400
-	if user.UserUsername == "" || user.UserFullname == "" || user.UserEmail == "" || user.UserPassword == 0 || user.UserBalance == 0 {
+	fmt.Println(user.UserUsername);
+	fmt.Println(user.UserFullname);
+	fmt.Println(user.UserPassword);
+	fmt.Println(user.UserEmail);
+	fmt.Println(user.UserBalance);
+
+	if user.UserUsername == "" || user.UserFullname == "" || user.UserEmail == "" || user.UserPassword == 0{
 		w.WriteHeader(400)
-		json.NewEncoder(w).Encode("Some data is missing!")
+		io.WriteString(w, "Some fields are missing!");
 		return
 	}
 
@@ -236,12 +246,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	db.Table("users").Where("user_username = ?", user.UserUsername).Or("user_email = ?", user.UserEmail).Find(&users)
 	if len(users) != 0 {
 		w.WriteHeader(400)
-		json.NewEncoder(w).Encode("Username or Email already exist!!!!")
+		io.WriteString(w, "Username or email already exists!");
 		return
 	}
 
+
+	w.WriteHeader(201);
 	//Other wise create the user
-	db.Table("users").Select("UserUsername", "UserPassword", "UserFullname", "UserEmail").Create(user)
+	db.Table("users").Select("UserUsername", "UserPassword", "UserFullname", "UserEmail", "UserBalance").Create(user)
 	json.NewEncoder(w).Encode(user)
 }
 
