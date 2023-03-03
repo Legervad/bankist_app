@@ -53,7 +53,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		w.WriteHeader(400);
-		fmt.Println(56)
+		// fmt.Println(56)
 		return;
 	}
 
@@ -61,7 +61,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// O/w return a 401
 	if user.UserUsername == "" || user.UserPassword == 0 {
 		w.WriteHeader(401)
-		fmt.Println(64)
+		io.WriteString(w, "Please provide both the username and the password!")
+		// fmt.Println(64)
 		return
 	}
 
@@ -73,7 +74,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if currentUser.UserId == 0 || currentUser.UserPassword != user.UserPassword {
 		//Return 401 status code since the authentication FAILED
 		w.WriteHeader(401)
-		fmt.Println(76)
+		io.WriteString(w, "Username or Password is wrong!");
+		// fmt.Println(76)
 		return
 	}
 	// O/w the user exists and we will create the token 
@@ -95,10 +97,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	tokenString, err := token.SignedString(jwtKey);
 	if err != nil {
 		w.WriteHeader(500)
-		fmt.Println(98)
+		// fmt.Println(98)
 		return;
 	}
-
+	
 	//No we are ready to set those things up in our cookies.
 	http.SetCookie(w, 
 		&http.Cookie{
@@ -111,9 +113,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	userTokens[currentUser.UserUsername] = tokenString;
 	
 	// Return the currentUser's data within the response body.
+	w.WriteHeader(200);
 	json.NewEncoder(w).Encode(&currentUser)
 
-	fmt.Printf("The token string assigned =>  %s\n", tokenString);
+	// fmt.Printf("The token string assigned =>  %s\n", tokenString);
+
+	// Log the user's info into the console.
+	fmt.Printf("A user logged in!\n\tFull Name: %s\n\tUsername: %s\n\tEmail: %s\n\tToken: %s\n", currentUser.UserFullname, currentUser.UserUsername, currentUser.UserEmail, tokenString);
 }
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -136,7 +142,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		//Also note that, when the cookie expires this if block is executed!
 		if err == http.ErrNoCookie {
 			w.WriteHeader(401)
-			fmt.Println(124)
+			// fmt.Println(124)
 			return;
 		}
 		w.WriteHeader(400) // o/w return bad request status code
@@ -145,7 +151,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	// If it is valid we get the cookie.value
 	tokenStr := cookie.Value
 
-	fmt.Printf("The token string assigned =>  %s\n", tokenStr);
+	// fmt.Printf("The token string assigned =>  %s\n", tokenStr);
 	//If the requested user's data does not belong to the current user then return
 	if tokenStr != userTokens[user.UserUsername] {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -165,7 +171,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			w.WriteHeader(401);
-			fmt.Println(145)
+			// fmt.Println(145)
 			
 			return;
 		}
@@ -192,7 +198,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	// O/w return a 401
 	if user.UserUsername == "" || user.UserPassword == 0 {
 		w.WriteHeader(401)
-		fmt.Println(179)
+		// fmt.Println(179)
 		return
 	}
 
@@ -214,23 +220,14 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	
 	w.Header().Set("Content-Type", "application/json")
-	// w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5500")
-	// w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	var user User
 	json.NewDecoder(r.Body).Decode(&user);
 	// Also initialize the balance to be 0
 	user.UserBalance = 0;
 
-
 	// Check if necessary information is complete
 	// If not return 400
-	fmt.Println(user.UserUsername);
-	fmt.Println(user.UserFullname);
-	fmt.Println(user.UserPassword);
-	fmt.Println(user.UserEmail);
-	fmt.Println(user.UserBalance);
-
 	if user.UserUsername == "" || user.UserFullname == "" || user.UserEmail == "" || user.UserPassword == 0{
 		w.WriteHeader(400)
 		io.WriteString(w, "Some fields are missing!");
@@ -252,9 +249,11 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 
 	w.WriteHeader(201);
-	//Other wise create the user
+	//Otherwise create the user
 	db.Table("users").Select("UserUsername", "UserPassword", "UserFullname", "UserEmail", "UserBalance").Create(user)
 	json.NewEncoder(w).Encode(user)
+
+	fmt.Printf("A new user registered!\n\tFull Name: %s\n\tUsername: %s\n\tEmail: %s\n", user.UserFullname, user.UserUsername, user.UserEmail);
 }
 
 //We expect user_id_from, user_id_to, and transaction_amount.
@@ -287,7 +286,7 @@ func TransactionHandler(w http.ResponseWriter, r *http.Request) {
 			return;
 		}
 		w.WriteHeader(400) // o/w return bad request status code
-		fmt.Println(271)
+		// fmt.Println(271)
 		return
 	}
 	// If it is valid we get the cookie.value
@@ -327,7 +326,8 @@ func TransactionHandler(w http.ResponseWriter, r *http.Request) {
 	// Afterwards, make sure that user_id_from is not the same as user_id_to, o/w return 400, bad request.=====================================================
 	if transaction.UserIdFrom == transaction.UserIdTo {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("You cannot money to yourself!")
+		io.WriteString(w, "You cannot send money to yourself!");
+		fmt.Println("You cannot send money to yourself!")
 		return;
 	}
 	
@@ -340,7 +340,8 @@ func TransactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return the status code
 	w.WriteHeader(http.StatusCreated)
-	fmt.Println("Transaction successfully created!")
+	// fmt.Println("Transaction successfully created!")
+	fmt.Printf("A new transaction realized!\n\tFrom: %d\n\tTo: %d\n\tAmount: %d\n", userFrom.UserId, userTo.UserId, transaction.TransactionAmount);
 }
 
 // This function will realize the loan
@@ -375,7 +376,7 @@ func LoanHandler(w http.ResponseWriter, r *http.Request) {
 			return;
 		}
 		w.WriteHeader(400) // o/w return bad request status code
-		fmt.Println(271)
+		// fmt.Println(271)
 		return
 	}
 	// If it is valid we get the cookie.value
@@ -411,11 +412,14 @@ func LoanHandler(w http.ResponseWriter, r *http.Request) {
 	// Realize the loan=========================================================================================================================
 	db.Table("transactions").Select("UserIdTo", "TransactionAmount").Create(&transaction);
 	w.WriteHeader(http.StatusCreated);
-	fmt.Println("Succesfully created loan");
+	// fmt.Println("Succesfully created loan");
 
 	// Update the balance of the user as well============================================================
-	fmt.Printf("Transaction amount is %d\nCurrent balance is %d\nNew balance is %d", transaction.TransactionAmount, user.UserBalance, transaction.TransactionAmount+user.UserBalance);
+	// fmt.Printf("Transaction amount is %d\nCurrent balance is %d\nNew balance is %d", transaction.TransactionAmount, user.UserBalance, transaction.TransactionAmount+user.UserBalance);
 
 	//THAT IS HOW YOU UPDATE 			!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	db.Table("users").Where("user_id = ?", user.UserId).Select("UserBalance").Updates(User{UserBalance: transaction.TransactionAmount + user.UserBalance});
+
+	// Log the loan info
+	fmt.Printf("A user loaned money!\n\tUsername: %s\n\tUserId: %d\n\tAmount: %d\n", user.UserUsername, user.UserId, transaction.TransactionAmount);
 }

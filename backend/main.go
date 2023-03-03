@@ -1,4 +1,4 @@
-// gorilla/mux library for routing, the built-in net/http library for http requests, gorm for queryin
+// gorilla/mux library for routing, the built-in net/http library for http requests, gorm for querying
 package main
 
 import (

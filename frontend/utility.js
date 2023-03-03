@@ -1,5 +1,4 @@
 `use strict`;
-
 function displayMovements(movements, containerMovements) {
     containerMovements.innerHTML = ``;
     for (const [index, movement] of movements.entries()) {
@@ -15,19 +14,19 @@ function displayMovements(movements, containerMovements) {
     }
 }
 function calcDisplaySummary(movements, labelSumIn, labelSumOut) {
-    console.log(`Movs len ${movements.length}`);
-    console.log(`Movs nonneg len ${movements.filter(curr => curr >= 0).length}`);
-    console.log(`Movs neg len ${movements.filter(curr => curr < 0).length}`);
-    console.log();
-    console.log();
-    console.log();
+    // console.log(`Movs len ${movements.length}`);
+    // console.log(`Movs nonneg len ${movements.filter(curr => curr >= 0).length}`);
+    // console.log(`Movs neg len ${movements.filter(curr => curr < 0).length}`);
+    // console.log();
+    // console.log();
+    // console.log();
     labelSumIn.textContent =
         movements.length == 0
             ? `${0} €`
             : movements.reduce((acc, currNum) => {
-                  console.log(`currNum in labelsumIN ${currNum}`);
+                  //   console.log(`currNum in labelsumIN ${currNum}`);
                   if (currNum > 0) {
-                      console.log(`currNum for IN ${currNum}`);
+                      //   console.log(`currNum for IN ${currNum}`);
                       acc += currNum;
                   }
                   return acc;
@@ -38,7 +37,7 @@ function calcDisplaySummary(movements, labelSumIn, labelSumOut) {
             ? `${0} €`
             : Math.abs(
                   movements.reduce((acc, currNum) => {
-                      console.log(`currNum in labelsumOUT ${currNum}`);
+                      //   console.log(`currNum in labelsumOUT ${currNum}`);
                       if (currNum < 0) {
                           acc += currNum;
                       }
@@ -77,4 +76,16 @@ function clearRegistrationForm(userName, userSurname, userUsername, userPassword
     userPassword.value = '';
     userMail.value = '';
 }
-export { displayMovements, calcDisplaySummary, balanceAdd, sleep, closeModal, openModal, clearRegistrationForm };
+
+// This function will return a setInterval function that will update the timer label each second
+function updateTimer(labelTimer) {
+    let seconds = 120;
+    return setInterval(() => {
+        seconds--;
+        labelTimer.textContent = `0${Math.floor(seconds / 60)}:${seconds % 60 < 10 ? `0${seconds % 60}` : `${seconds % 60}`}`;
+        if (seconds == 0) {
+            return;
+        }
+    }, 1000);
+}
+export { displayMovements, calcDisplaySummary, balanceAdd, sleep, closeModal, openModal, clearRegistrationForm, updateTimer };

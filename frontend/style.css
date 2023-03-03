@@ -376,7 +376,7 @@ h2 {
     font-size: 1.6rem;
     font-family: inherit;
     text-align: center;
-    width: 40rem;
+    width: 99%;
     border-radius: 10rem;
     margin-right: 1rem;
     color: inherit;
@@ -396,6 +396,6 @@ h2 {
     margin-left: 73%;
 }
 #registration-header {
-    margin-left: 36.5%;
+    margin-left: 38.6%;
     margin-bottom: 10%;
 }

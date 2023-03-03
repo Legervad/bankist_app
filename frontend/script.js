@@ -9,7 +9,6 @@ const labelDate = document.querySelector('.date');
 const labelBalance = document.querySelector('.balance__value');
 const labelSumIn = document.querySelector('.summary__value--in');
 const labelSumOut = document.querySelector('.summary__value--out');
-const labelSumInterest = document.querySelector('.summary__value--interest');
 const labelTimer = document.querySelector('.timer');
 
 const containerApp = document.querySelector('.app');
@@ -19,7 +18,6 @@ const containerLogin = document.querySelector('.login');
 const btnLogin = document.querySelector('.login__btn');
 const btnTransact = document.querySelector('.form__btn--transfer');
 const btnLoan = document.querySelector('.form__btn--loan');
-const btnClose = document.querySelector('.form__btn--close');
 const btnSort = document.querySelector('.btn--sort');
 const btnRegister = document.querySelector('.register-anchor');
 
@@ -28,8 +26,6 @@ const inputLoginPin = document.querySelector('.login__input--pin');
 const inputTransferTo = document.querySelector('.form__input--to');
 const inputTransferAmount = document.querySelector('.form__input--amount');
 const inputLoanAmount = document.querySelector('.form__input--loan-amount');
-const inputCloseUsername = document.querySelector('.form__input--user');
-const inputClosePin = document.querySelector('.form__input--pin');
 
 // Registration modal
 const overlay = document.querySelector(`.overlay`);
@@ -46,11 +42,11 @@ const userMail = document.getElementById('user-email');
 let currentUser;
 let currentTransactions;
 let myTimeout;
+let myTimeInterval;
 
 btnLogin.addEventListener(`click`, function (e) {
     e.preventDefault();
 
-    containerLogin.style.opacity = 0;
     currentUser = null;
     currentTransactions = [];
 
@@ -60,12 +56,24 @@ btnLogin.addEventListener(`click`, function (e) {
         userPassword: Number(inputLoginPin.value),
     };
     // Using the literal send the request
+    let statusCode;
     fetch('http://localhost:8080/login', opt.loginOptions(requestUser))
         .then(response => {
-            console.log(response.statusText);
+            //If the status code is not 200 then return the error text.
+            statusCode = response.status;
+            console.log(response.status);
+            if (statusCode != 200) {
+                return response.text();
+            }
             return response.json();
         })
         .then(response => {
+            console.log(statusCode);
+            if (statusCode != 200) {
+                alert(response);
+                throw new Error(response);
+            }
+            containerLogin.style.opacity = 0;
             //Create the current user object
             currentUser = new classes.User(response.userId, response.userUsername, response.userPassword, response.userFullname, response.userEmail, response.userBalance);
 
@@ -79,8 +87,6 @@ btnLogin.addEventListener(`click`, function (e) {
             //Send request to the server
             fetch('http://localhost:8080/home', opt.homeOptions(requestUser))
                 .then(response => {
-                    console.log(response);
-                    console.log(response.statusText);
                     return response.json();
                 })
                 .then(response => {
@@ -107,7 +113,8 @@ btnLogin.addEventListener(`click`, function (e) {
                     console.log(currentUser);
                     containerApp.style.opacity = 100;
 
-                    // Call the settimeout function so that after some time the
+                    // Call the settimeout function so that after some time the session is over
+                    myTimeInterval = utility.updateTimer(labelTimer);
                     myTimeout = setTimeout(() => {
                         currentUser = null;
                         currentTransactions = [];
@@ -115,16 +122,26 @@ btnLogin.addEventListener(`click`, function (e) {
                         containerLogin.style.opacity = 100;
                         labelWelcome.innerHTML = `<p class="welcome">Log in to get started, or <a class="register-anchor" href="">register</a> now!</p>`;
                         labelBalance.textContent = ``;
+                        labelTimer.textContent = `02:00`;
+                        inputLoanAmount.value = ``;
+                        inputTransferAmount.value = ``;
+                        inputTransferTo.value = ``;
 
                         utility.calcDisplaySummary(currentTransactions, labelSumIn, labelSumOut);
                         utility.displayMovements(currentTransactions, containerMovements);
-                    }, 120000);
-                });
+
+                        // Clear myTimeInterval
+                        clearInterval(myTimeInterval);
+                    }, 121000);
+                })
+                .catch(error => console.log(error));
         });
 });
 
 btnTransact.addEventListener(`click`, function (e) {
     e.preventDefault();
+
+    utility.sleep(2000);
 
     // Create transaction object, and fill its user_if_from user_id_to and transaction_amount
     let currTransaction = new classes.Transaction();
@@ -141,38 +158,36 @@ btnTransact.addEventListener(`click`, function (e) {
         return;
     }
 
-    // Send the request to the server
+    // Don't forget to update the currentUser's balance as well.
+    currentUser.userBalance -= currTransaction.transactionAmount;
+    inputTransferTo.value = '';
+    inputTransferAmount.value = '';
 
+    // Send the request to the server
+    let statusCode;
     fetch('http://localhost:8080/transaction', opt.transactionOptions(currTransaction))
         .then(response => {
             // That means we failed to realize the transaction
+            statusCode = response.status;
+            console.log(response.status);
             if (response.status != 201) {
-                throw new Error(`Failed to realize the transaction ${response.statusText}!`);
+                return response.text();
             }
         })
-        .then(() => {
-            //Since we are sending money, the transaction amount should be added as negative
-            currentTransactions.push(-currTransaction.transactionAmount);
-            utility.calcDisplaySummary(currentTransactions, labelSumIn, labelSumOut);
-            utility.displayMovements(currentTransactions, containerMovements);
-            utility.balanceAdd(labelBalance, -currTransaction.transactionAmount);
-
-            // Don't forget to update the currentUser's balance as well.
-            currentUser.userBalance -= currTransaction.transactionAmount;
-            inputTransferTo.value = '';
-            inputTransferAmount.value = '';
-        });
-});
-
-btnClose.addEventListener(`click`, function (e) {
-    e.preventDefault();
-    if (currentUser.username === inputCloseUsername.value && currentUser.pin === Number(inputClosePin.value)) {
-        accounts = accounts.filter(acc => acc.username !== inputCloseUsername.value);
-        containerApp.style.opacity = 0;
-
-        labelWelcome.textContent = `Login to get started`;
-        inputClosePin.value = inputCloseUsername.value = ``;
-    }
+        .then(data => {
+            if (statusCode != 201) {
+                alert(data);
+                throw new Error(`Failed to realize the transaction ${response.statusText}!`);
+            } else {
+                alert('Successfully realized the transaction!');
+                //Since we are sending money, the transaction amount should be added as negative
+                currentTransactions.push(-currTransaction.transactionAmount);
+                utility.calcDisplaySummary(currentTransactions, labelSumIn, labelSumOut);
+                utility.displayMovements(currentTransactions, containerMovements);
+                utility.balanceAdd(labelBalance, -currTransaction.transactionAmount);
+            }
+        })
+        .catch(error => console.log(error));
 });
 
 //You can loan if you have at least 10% of the amount you requested as a deposit
@@ -189,6 +204,7 @@ btnLoan.addEventListener(`click`, function (e) {
     currTransaction.transactionAmount = Number(inputLoanAmount.value);
 
     // Send the request to the server using the fetch api
+    inputLoanAmount.value = ``;
 
     fetch('http://localhost:8080/loan', opt.loanOptions(currTransaction))
         .then(response => {
